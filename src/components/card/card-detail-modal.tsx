@@ -12,17 +12,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import {
-  Users,
-  Tag,
   CheckSquare,
-  Calendar,
   Trash2,
   Archive,
+  Calendar,
 } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 import { ChecklistSection } from "./checklist";
 import { CommentsSection } from "./comments";
 import { LabelsSection } from "./labels";
 import { MembersSection } from "./members";
+import { LabelPicker } from "./label-picker";
+import { MemberPicker } from "./member-picker";
+import { DueDatePicker } from "./due-date-picker";
 import type { CardWithDetails } from "@/types";
 
 export function CardDetailModal({
@@ -136,6 +138,16 @@ export function CardDetailModal({
               <MembersSection members={card.members} />
             )}
 
+            {/* Due Date */}
+            {card.dueDate && (
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-secondary" />
+                <span className="text-sm text-secondary">
+                  Due {formatDate(card.dueDate)}
+                </span>
+              </div>
+            )}
+
             {/* Description */}
             <div>
               <h4 className="mb-2 text-sm font-semibold text-neutral-900">
@@ -205,22 +217,16 @@ export function CardDetailModal({
             <p className="text-xs font-medium uppercase text-secondary mb-2">
               Add to card
             </p>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start gap-2 text-secondary"
-            >
-              <Users className="h-4 w-4" />
-              Members
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start gap-2 text-secondary"
-            >
-              <Tag className="h-4 w-4" />
-              Labels
-            </Button>
+            <MemberPicker
+              cardId={card.id}
+              currentMembers={card.members}
+              onUpdate={refreshCard}
+            />
+            <LabelPicker
+              cardId={card.id}
+              currentLabels={card.labels}
+              onUpdate={refreshCard}
+            />
             <Button
               variant="ghost"
               size="sm"
@@ -230,14 +236,11 @@ export function CardDetailModal({
               <CheckSquare className="h-4 w-4" />
               Checklist
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start gap-2 text-secondary"
-            >
-              <Calendar className="h-4 w-4" />
-              Due Date
-            </Button>
+            <DueDatePicker
+              cardId={card.id}
+              currentDueDate={card.dueDate}
+              onUpdate={refreshCard}
+            />
 
             {showChecklistInput && (
               <div className="space-y-2 rounded-lg border p-2">
@@ -271,6 +274,7 @@ export function CardDetailModal({
               variant="ghost"
               size="sm"
               className="w-full justify-start gap-2 text-secondary"
+              onClick={deleteCard}
             >
               <Archive className="h-4 w-4" />
               Archive
