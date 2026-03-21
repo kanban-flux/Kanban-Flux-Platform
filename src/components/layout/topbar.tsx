@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 import { Bell, Settings, Search } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,8 @@ const tabs = [
 
 export function Topbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [searchValue, setSearchValue] = useState("");
 
   return (
     <header className="flex h-14 items-center justify-between border-b border-gray-200 bg-white px-6">
@@ -53,6 +56,13 @@ export function Topbar() {
           <Input
             placeholder="Search..."
             className="h-8 w-48 pl-8 text-sm bg-surface border-0"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && searchValue.trim()) {
+                router.push(`/search?q=${encodeURIComponent(searchValue.trim())}`);
+              }
+            }}
           />
         </div>
         <button className="relative rounded-lg p-2 text-secondary hover:bg-surface">
