@@ -3,7 +3,7 @@ import { getProvider } from "./provider";
 import { buildTaskContext } from "./context-builder";
 import { decrypt } from "./crypto";
 import type { AgentAction } from "./types";
-import type { Prisma } from "@prisma/client";
+import type { Prisma, AgentProvider as AgentProviderType } from "@prisma/client";
 
 const MAX_EXECUTION_TIME = 5 * 60 * 1000; // 5 minutes
 
@@ -13,7 +13,7 @@ async function logRun(runId: string, level: string, message: string, metadata?: 
   });
 }
 
-async function applyAction(action: AgentAction, cardId: string, agentUserId: string, runId: string): Promise<void> {
+async function applyAction(action: AgentAction, cardId: string, agentUserId: string, runId: string, agentId?: string): Promise<void> {
   switch (action.type) {
     case "comment": {
       const { text } = action.payload as { text: string };
@@ -156,17 +156,46 @@ async function applyAction(action: AgentAction, cardId: string, agentUserId: str
       const { repo, title, body, head, base } = action.payload as {
         repo: string; title: string; body: string; head: string; base?: string;
       };
-      const { createPullRequest } = await import("@/lib/github");
-      const pr = await createPullRequest(repo, title, body, head, base || "main");
-      await logRun(runId, "info", `Created PR #${pr.number}: ${title} (${pr.url})`);
+      if (agentId) {
+        // Create approval gate for PR creation
+        await prisma.approvalGate.create({
+          data: {
+            runId,
+            agentId,
+            actionType: "create_pr",
+            description: `Agent wants to create PR "${title}" in ${repo} (${head} -> ${base || "main"})`,
+            metadata: action.payload as unknown as Prisma.InputJsonValue,
+          },
+        });
+        await logRun(runId, "info", `Approval required: create PR "${title}" - waiting for human approval`);
+      } else {
+        const { createPullRequest } = await import("@/lib/github");
+        const pr = await createPullRequest(repo, title, body, head, base || "main");
+        await logRun(runId, "info", `Created PR #${pr.number}: ${title} (${pr.url})`);
+      }
       break;
     }
 
     case "merge_pr": {
       const { repo, pullNumber } = action.payload as { repo: string; pullNumber: number };
-      const { mergePullRequest } = await import("@/lib/github");
-      await mergePullRequest(repo, pullNumber);
-      await logRun(runId, "info", `Merged PR #${pullNumber} in ${repo}`);
+      if (agentId) {
+        // Create approval gate - don't execute the merge directly
+        await prisma.approvalGate.create({
+          data: {
+            runId,
+            agentId,
+            actionType: "merge_pr",
+            description: `Agent wants to merge PR #${pullNumber} in ${repo}`,
+            metadata: action.payload as unknown as Prisma.InputJsonValue,
+          },
+        });
+        await logRun(runId, "info", `Approval required: merge PR #${pullNumber} - waiting for human approval`);
+      } else {
+        // No agentId available, execute directly (legacy path)
+        const { mergePullRequest } = await import("@/lib/github");
+        await mergePullRequest(repo, pullNumber);
+        await logRun(runId, "info", `Merged PR #${pullNumber} in ${repo}`);
+      }
       break;
     }
 
@@ -241,7 +270,34 @@ export async function executeRun(runId: string): Promise<void> {
       return;
     }
 
-    const response = await provider.execute(context, apiKey);
+    let response;
+    try {
+      response = await provider.execute(context, apiKey);
+    } catch (providerError) {
+      await logRun(runId, "warn", `Provider ${run.agent.provider} failed, trying fallback...`);
+
+      // Try fallback provider
+      const { getProviderFallback } = await import("./smart-router");
+      const availableKeys = await prisma.agentApiKey.findMany({ select: { provider: true } });
+      const availableProviders = Array.from(new Set(availableKeys.map(k => k.provider)));
+      const fallback = getProviderFallback(run.agent.provider, availableProviders);
+
+      if (fallback) {
+        const fallbackKeyRecord = await prisma.agentApiKey.findFirst({ where: { provider: fallback.provider as AgentProviderType } });
+        if (fallbackKeyRecord) {
+          const fallbackKey = decrypt(fallbackKeyRecord.encryptedKey, fallbackKeyRecord.iv);
+          const fallbackProvider = getProvider(fallback.provider);
+          // Override model in context
+          context.agent.model = fallback.model;
+          response = await fallbackProvider.execute(context, fallbackKey);
+          await logRun(runId, "info", `Fallback to ${fallback.provider}/${fallback.model} succeeded`);
+        } else {
+          throw providerError; // No fallback available
+        }
+      } else {
+        throw providerError;
+      }
+    }
 
     await logRun(runId, "info", `Provider returned ${response.actions.length} actions, ${response.tokenUsage} tokens`);
 
@@ -255,7 +311,7 @@ export async function executeRun(runId: string): Promise<void> {
       }
 
       try {
-        await applyAction(action, run.cardId, run.agent.user.id, runId);
+        await applyAction(action, run.cardId, run.agent.user.id, runId, run.agentId);
       } catch (actionError) {
         await logRun(runId, "error", `Failed to apply action ${action.type}: ${actionError instanceof Error ? actionError.message : String(actionError)}`);
       }

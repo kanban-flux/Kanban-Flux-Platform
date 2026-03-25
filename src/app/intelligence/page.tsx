@@ -17,7 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Brain, RefreshCw, Network, GitBranch, Zap } from "lucide-react";
+import { Brain, RefreshCw, Network, GitBranch, Zap, FileText, Loader2 } from "lucide-react";
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                     */
@@ -26,6 +26,16 @@ import { Brain, RefreshCw, Network, GitBranch, Zap } from "lucide-react";
 interface Project {
   id: string;
   name: string;
+}
+
+interface ReportSection {
+  title: string;
+  content: string;
+}
+
+interface ReportData {
+  sections: ReportSection[];
+  generatedAt: string;
 }
 
 interface GraphNode {
@@ -466,6 +476,8 @@ export default function IntelligencePage() {
     nodeCount: number;
     edgeCount: number;
   } | null>(null);
+  const [report, setReport] = useState<ReportData | null>(null);
+  const [generatingReport, setGeneratingReport] = useState(false);
 
   // Load projects
   useEffect(() => {
@@ -530,6 +542,24 @@ export default function IntelligencePage() {
     }
   }
 
+  async function handleGenerateReport() {
+    if (!selectedProjectId) return;
+    setGeneratingReport(true);
+    try {
+      const res = await fetch("/api/intelligence/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId: selectedProjectId }),
+      });
+      const data = await res.json();
+      setReport(data);
+    } catch {
+      // silent
+    } finally {
+      setGeneratingReport(false);
+    }
+  }
+
   const hasGraph =
     graphData && graphData.nodes.length > 0;
 
@@ -581,6 +611,19 @@ export default function IntelligencePage() {
               <Zap className="mr-2 h-4 w-4" />
             )}
             {building ? "Building..." : "Build Graph"}
+          </Button>
+
+          <Button
+            onClick={handleGenerateReport}
+            disabled={generatingReport || !selectedProjectId}
+            variant="outline"
+          >
+            {generatingReport ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <FileText className="mr-2 h-4 w-4" />
+            )}
+            {generatingReport ? "Generating..." : "Generate Report"}
           </Button>
 
           {stats && (
@@ -695,6 +738,37 @@ export default function IntelligencePage() {
               </CardContent>
             </Card>
           </div>
+        )}
+
+        {/* Report Section */}
+        {report && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <FileText className="h-5 w-5 text-primary" />
+                Intelligence Report
+                <span className="ml-auto text-xs font-normal text-secondary">
+                  Generated {new Date(report.generatedAt).toLocaleString()}
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {report.sections.map((section, idx) => (
+                  <Card key={idx} className={section.title.toLowerCase().includes("executive") ? "md:col-span-2" : ""}>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-semibold">{section.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="prose prose-sm max-w-none text-secondary whitespace-pre-line">
+                        {section.content}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
     </AppLayout>
