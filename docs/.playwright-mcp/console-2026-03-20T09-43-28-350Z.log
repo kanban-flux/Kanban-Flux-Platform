@@ -1,0 +1,9 @@
+[     153ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/api/boards/clwprod01:0
+[     166ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/calendar?_rsc=139nw:0
+[     186ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/reports?_rsc=139nw:0
+[     187ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/settings?_rsc=139nw:0
+[     192ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/tasks?_rsc=139nw:0
+[    2516ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/calendar?_rsc=gst1y:0
+[    2517ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/settings?_rsc=gst1y:0
+[    2519ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/tasks?_rsc=gst1y:0
+[    2533ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/reports?_rsc=gst1y:0

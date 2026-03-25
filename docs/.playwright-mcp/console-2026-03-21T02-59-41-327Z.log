@@ -1,0 +1,10 @@
+[  753573ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://www.metal-archives.com/artists/Gustavo_Iandoli/797010:0
+[  754192ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://www.metal-archives.com/favicon.ico:0
+[  754261ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://www.metal-archives.com/favicon.ico:0
+[  754288ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://www.metal-archives.com/favicon.ico:0
+[  756537ms] [ERROR]  Note that 'script-src' was not explicitly set, so 'default-src' is used as a fallback. @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/4rrsc/0x4AAAAAAADnPIDROrmt1Wwj/light/fbE/new/normal?lang=auto:0
+[  756856ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/pat/9df9c62c0dc942f1/1774062737798/9332faf5a748e2b60ffcf14aa48df0bb79a87b189cb9e5dfbf2686564423c194/Ltmmhgs5OzwrrBW:0
+[  757473ms] [ERROR] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/4rrsc/0x4AAAAAAADnPIDROrmt1Wwj/light/fbE/new/normal?lang=auto:0
+[  757473ms] [ERROR] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/4rrsc/0x4AAAAAAADnPIDROrmt1Wwj/light/fbE/new/normal?lang=auto:0
+[  757475ms] [WARNING] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/4rrsc/0x4AAAAAAADnPIDROrmt1Wwj/light/fbE/new/normal?lang=auto:0
+[  757475ms] [WARNING] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/4rrsc/0x4AAAAAAADnPIDROrmt1Wwj/light/fbE/new/normal?lang=auto:0

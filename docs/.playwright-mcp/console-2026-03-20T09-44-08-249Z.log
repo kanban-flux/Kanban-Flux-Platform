@@ -1,0 +1,6 @@
+[     133ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/calendar?_rsc=1dalf:0
+[     133ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/settings?_rsc=1dalf:0
+[     134ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/tasks?_rsc=1dalf:0
+[     148ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/reports?_rsc=1dalf:0
+[  552203ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/settings?_rsc=1dalf:0
+[ 6423042ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/tasks?_rsc=1dalf:0
