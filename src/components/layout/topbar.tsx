@@ -15,6 +15,7 @@ import {
   ArrowRight,
   AtSign,
   Check,
+  Shield,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -73,6 +74,8 @@ function getNotificationIcon(type: string) {
       return <ArrowRight className="h-4 w-4 text-orange-500" />;
     case "mention":
       return <AtSign className="h-4 w-4 text-pink-500" />;
+    case "approval_required":
+      return <Shield className="h-4 w-4 text-amber-500" />;
     default:
       return <Bell className="h-4 w-4 text-gray-500" />;
   }

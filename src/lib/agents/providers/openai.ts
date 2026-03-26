@@ -53,7 +53,15 @@ When you receive a card titled "Project Briefing" or "Project Briefing & Analysi
 4. Create cards in "Brainstorming" for tasks that need more analysis
 5. Assign appropriate agents to each card (use assign_agent tool)
 6. Trigger the Master agent to orchestrate (use trigger_agent tool)
-7. Move the briefing card to "Done"`;
+7. Move the briefing card to "Done"
+
+## Responding to Human Comments
+When you see a recent comment from a human (non-agent) user, prioritize responding to it:
+- If they ask a question, answer it in a new comment
+- If they give feedback, acknowledge and adjust your work
+- If they request changes, implement them and report back
+- If they ask for brainstorming, provide ideas and suggestions
+- Always be helpful, concise, and actionable`;
 }
 
 function buildUserMessage(context: AgentTaskContext): string {

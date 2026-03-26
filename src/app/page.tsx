@@ -6,6 +6,7 @@ import { RecentBoards } from "@/components/dashboard/recent-boards";
 import { AllBoardsTable } from "@/components/dashboard/all-boards-table";
 import { CreateBoardDialog } from "@/components/dashboard/create-board-dialog";
 import { AgentActivity } from "@/components/dashboard/agent-activity";
+import { ApprovalsPanel } from "@/components/agents/approvals-panel";
 import type { BoardSummary } from "@/types";
 
 const DEFAULT_WORKSPACE_ID = "default-workspace";
@@ -39,6 +40,7 @@ export default function DashboardPage() {
             Manage your project boards and team velocity.
           </p>
         </div>
+        <ApprovalsPanel />
         <RecentBoards
           boards={boards}
           onCreateBoard={() => setShowCreateDialog(true)}

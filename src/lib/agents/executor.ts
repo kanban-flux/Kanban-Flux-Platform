@@ -158,16 +158,30 @@ async function applyAction(action: AgentAction, cardId: string, agentUserId: str
       };
       if (agentId) {
         // Create approval gate for PR creation
+        const gateDescription = `Agent wants to create PR "${title}" in ${repo} (${head} -> ${base || "main"})`;
         await prisma.approvalGate.create({
           data: {
             runId,
             agentId,
             actionType: "create_pr",
-            description: `Agent wants to create PR "${title}" in ${repo} (${head} -> ${base || "main"})`,
+            description: gateDescription,
             metadata: action.payload as unknown as Prisma.InputJsonValue,
           },
         });
         await logRun(runId, "info", `Approval required: create PR "${title}" - waiting for human approval`);
+        // Notify admin about pending approval
+        const { createNotification } = await import("@/lib/notifications");
+        const agentUser = await prisma.user.findUnique({ where: { id: agentUserId }, select: { name: true } });
+        const adminUser = await prisma.user.findFirst({ where: { isAgent: false } });
+        if (adminUser) {
+          await createNotification({
+            userId: adminUser.id,
+            type: "approval_required",
+            title: "Approval Required",
+            message: `${agentUser?.name || "Agent"} wants to create_pr: ${gateDescription}`,
+            cardId,
+          });
+        }
       } else {
         const { createPullRequest } = await import("@/lib/github");
         const pr = await createPullRequest(repo, title, body, head, base || "main");
@@ -180,16 +194,30 @@ async function applyAction(action: AgentAction, cardId: string, agentUserId: str
       const { repo, pullNumber } = action.payload as { repo: string; pullNumber: number };
       if (agentId) {
         // Create approval gate - don't execute the merge directly
+        const mergeDescription = `Agent wants to merge PR #${pullNumber} in ${repo}`;
         await prisma.approvalGate.create({
           data: {
             runId,
             agentId,
             actionType: "merge_pr",
-            description: `Agent wants to merge PR #${pullNumber} in ${repo}`,
+            description: mergeDescription,
             metadata: action.payload as unknown as Prisma.InputJsonValue,
           },
         });
         await logRun(runId, "info", `Approval required: merge PR #${pullNumber} - waiting for human approval`);
+        // Notify admin about pending approval
+        const { createNotification: createMergeNotification } = await import("@/lib/notifications");
+        const mergeAgentUser = await prisma.user.findUnique({ where: { id: agentUserId }, select: { name: true } });
+        const mergeAdminUser = await prisma.user.findFirst({ where: { isAgent: false } });
+        if (mergeAdminUser) {
+          await createMergeNotification({
+            userId: mergeAdminUser.id,
+            type: "approval_required",
+            title: "Approval Required",
+            message: `${mergeAgentUser?.name || "Agent"} wants to merge_pr: ${mergeDescription}`,
+            cardId,
+          });
+        }
       } else {
         // No agentId available, execute directly (legacy path)
         const { mergePullRequest } = await import("@/lib/github");
