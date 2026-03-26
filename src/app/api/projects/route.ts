@@ -89,6 +89,16 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Setup CI/CD workflows
+    try {
+      const { setupAllCI } = await import("@/lib/cicd/setup");
+      const repoName = githubRepo!.split("/")[1];
+      await setupAllCI(repoName);
+    } catch (ciError) {
+      console.error("Failed to setup CI/CD:", ciError);
+      // Non-blocking - project creation still succeeds
+    }
   }
 
   const project = await prisma.project.create({

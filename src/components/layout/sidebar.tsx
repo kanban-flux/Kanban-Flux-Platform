@@ -12,6 +12,7 @@ import {
   Users,
   Bot,
   Brain,
+  Store,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -27,6 +28,7 @@ const navItems = [
   { label: "Members", icon: Users, href: "/team" },
   { label: "AI Agents", icon: Bot, href: "/agents" },
   { label: "Intelligence", icon: Brain, href: "/intelligence" },
+  { label: "Marketplace", icon: Store, href: "/marketplace" },
   { label: "Settings", icon: Settings, href: "/settings" },
 ];
 

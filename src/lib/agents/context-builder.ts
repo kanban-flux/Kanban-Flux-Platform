@@ -45,6 +45,10 @@ export async function buildTaskContext(cardId: string, agentId: string): Promise
     },
   });
 
+  // Fetch recent memories for this agent
+  const { recallRecentMemories } = await import("./memory");
+  const recentMemories = await recallRecentMemories(agentId, 5);
+
   return {
     card: {
       id: card.id,
@@ -103,5 +107,10 @@ export async function buildTaskContext(cardId: string, agentId: string): Promise
           },
         }
       : {}),
+    memories: recentMemories.map((m) => ({
+      type: m.type,
+      content: m.content,
+      tags: m.tags,
+    })),
   };
 }

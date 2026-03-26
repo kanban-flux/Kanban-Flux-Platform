@@ -209,6 +209,54 @@ async function applyAction(action: AgentAction, cardId: string, agentUserId: str
       break;
     }
 
+    case "setup_cicd": {
+      const { repo, template } = action.payload as { repo: string; template?: string };
+      if (template && template !== "all") {
+        const { setupDeployWorkflow } = await import("@/lib/cicd/setup");
+        await setupDeployWorkflow(repo, template);
+        await logRun(runId, "info", `Set up ${template} deploy workflow for ${repo}`);
+      } else {
+        const { setupAllCI } = await import("@/lib/cicd/setup");
+        const files = await setupAllCI(repo);
+        await logRun(runId, "info", `Set up CI/CD for ${repo}: ${files.join(", ")}`);
+      }
+      break;
+    }
+
+    case "save_memory": {
+      const { type, content, tags } = action.payload as { type: string; content: string; tags?: string };
+      if (agentId) {
+        const { saveMemory } = await import("./memory");
+        await saveMemory({
+          agentId,
+          type,
+          content,
+          source: cardId,
+          tags: tags ? tags.split(",").map(t => t.trim()) : [],
+        });
+        await logRun(runId, "info", `Saved memory: [${type}] ${content.substring(0, 80)}...`);
+      } else {
+        await logRun(runId, "warn", "Cannot save memory: no agentId available");
+      }
+      break;
+    }
+
+    case "recall_memory": {
+      const { query } = action.payload as { query: string };
+      if (agentId) {
+        const { recallMemories } = await import("./memory");
+        const memories = await recallMemories(agentId, query);
+        if (memories.length > 0) {
+          await logRun(runId, "info", `Recalled ${memories.length} memories for "${query}": ${memories.map(m => m.content.substring(0, 50)).join("; ")}`);
+        } else {
+          await logRun(runId, "info", `No memories found for "${query}"`);
+        }
+      } else {
+        await logRun(runId, "warn", "Cannot recall memory: no agentId available");
+      }
+      break;
+    }
+
     default:
       await logRun(runId, "warn", `Unknown action type: ${action.type}`);
   }

@@ -38,6 +38,7 @@ export interface AgentTaskContext {
     name: string;
     githubRepo: string | null;
   };
+  memories?: { type: string; content: string; tags: string[] }[];
 }
 
 export type AgentActionType =
@@ -52,7 +53,10 @@ export type AgentActionType =
   | "git_commit"
   | "create_pr"
   | "merge_pr"
-  | "git_branch";
+  | "git_branch"
+  | "setup_cicd"
+  | "save_memory"
+  | "recall_memory";
 
 export interface AgentAction {
   type: AgentActionType;
@@ -222,6 +226,42 @@ export const AGENT_TOOLS_SCHEMA = [
         fromBranch: { type: "string", description: "Base branch (default: main)" },
       },
       required: ["repo", "branchName"],
+    },
+  },
+  {
+    name: "setup_cicd",
+    description: "Setup CI/CD pipelines for a project's GitHub repository. Creates GitHub Actions workflows for CI (build+test) and deployment templates (Railway, AWS, GCP).",
+    parameters: {
+      type: "object",
+      properties: {
+        repo: { type: "string", description: "Repository name (without org prefix)" },
+        template: { type: "string", description: "Deploy template: 'all', 'railway', 'aws', or 'gcp'" },
+      },
+      required: ["repo"],
+    },
+  },
+  {
+    name: "save_memory",
+    description: "Save something to your persistent memory for future reference. Use this to remember decisions, patterns, lessons learned, or important context.",
+    parameters: {
+      type: "object",
+      properties: {
+        type: { type: "string", description: "Memory type: decision, code_pattern, lesson, preference, context" },
+        content: { type: "string", description: "What to remember" },
+        tags: { type: "string", description: "Comma-separated tags for categorization" },
+      },
+      required: ["type", "content"],
+    },
+  },
+  {
+    name: "recall_memory",
+    description: "Search your persistent memory for relevant past experiences, decisions, or patterns.",
+    parameters: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "What to search for in memory" },
+      },
+      required: ["query"],
     },
   },
 ];

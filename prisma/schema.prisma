@@ -223,6 +223,7 @@ model Agent {
   runs           AgentRun[]
   apiKey         AgentApiKey?   @relation(fields: [apiKeyId], references: [id])
   approvalGates  ApprovalGate[]
+  memories       AgentMemory[]
 }
 
 model AgentApiKey {
@@ -360,4 +361,31 @@ model ApprovalGate {
 
   run   AgentRun @relation(fields: [runId], references: [id])
   agent Agent   @relation(fields: [agentId], references: [id])
+}
+
+model AgentMemory {
+  id        String   @id @default(cuid())
+  agentId   String
+  type      String              // "decision", "code_pattern", "lesson", "preference", "context"
+  content   String              // the memory content
+  source    String?             // cardId, runId, or project name that produced this memory
+  relevance Float    @default(1.0)  // decays over time
+  tags      String[]            // for quick filtering
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+}
+
+model TeamTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  category    String              // "saas", "landing-page", "api", "mobile", "data"
+  agents      Json                // array of agent configs [{role, name, provider, model, systemPrompt, capabilities}]
+  isPublic    Boolean  @default(false)
+  createdBy   String?
+  usageCount  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
