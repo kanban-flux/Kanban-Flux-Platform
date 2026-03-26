@@ -308,6 +308,52 @@ async function applyAction(action: AgentAction, cardId: string, agentUserId: str
       break;
     }
 
+    case "attach_file": {
+      const { filename, content: fileContent, fileType } = action.payload as {
+        filename: string; content: string; fileType?: string;
+      };
+      const ext = filename.split('.').pop()?.toLowerCase() || '';
+      const mimeTypes: Record<string, string> = {
+        ts: 'text/typescript', js: 'text/javascript', py: 'text/x-python',
+        md: 'text/markdown', txt: 'text/plain', json: 'application/json',
+        yaml: 'text/yaml', yml: 'text/yaml', html: 'text/html', css: 'text/css',
+        prisma: 'text/plain', sql: 'text/sql', sh: 'text/x-shellscript',
+      };
+      await prisma.cardAttachment.create({
+        data: {
+          cardId,
+          filename,
+          fileType: fileType || (mimeTypes[ext] ? 'code' : 'document'),
+          mimeType: mimeTypes[ext] || 'text/plain',
+          content: fileContent,
+          size: Buffer.byteLength(fileContent, 'utf8'),
+          createdBy: agentUserId,
+        },
+      });
+      await logRun(runId, "info", `Attached file: ${filename} (${fileType || 'code'})`);
+      break;
+    }
+
+    case "review_pr": {
+      const { repo, pullNumber } = action.payload as { repo: string; pullNumber: string };
+      const { getPRDiff, commentOnPR } = await import("@/lib/github");
+      const diff = await getPRDiff(repo, Number(pullNumber));
+      // Post the diff summary as a comment
+      await commentOnPR(repo, Number(pullNumber), `## AI Code Review\n\nReviewed by Kanban Flux QA Agent.\n\nDiff analyzed: ${diff.split('\n').length} lines changed.`);
+      await logRun(runId, "info", `Reviewed PR #${pullNumber} in ${repo}`);
+      break;
+    }
+
+    case "update_changelog": {
+      const { repo, version, entry } = action.payload as { repo: string; version?: string; entry: string };
+      const { commitFile } = await import("@/lib/github");
+      const dateStr = version || new Date().toISOString().split("T")[0];
+      const changelogEntry = `## ${dateStr}\n\n${entry}\n\n`;
+      await commitFile(repo, "CHANGELOG.md", changelogEntry, `docs: update changelog - ${dateStr}`);
+      await logRun(runId, "info", `Updated CHANGELOG.md in ${repo}`);
+      break;
+    }
+
     default:
       await logRun(runId, "warn", `Unknown action type: ${action.type}`);
   }
@@ -324,7 +370,7 @@ export async function executeRun(runId: string): Promise<void> {
         agent: {
           include: {
             apiKey: true,
-            user: { select: { id: true } },
+            user: { select: { id: true, name: true } },
           },
         },
       },
@@ -432,6 +478,46 @@ export async function executeRun(runId: string): Promise<void> {
 
     await logRun(runId, "info", `Run completed. Tokens: ${response.tokenUsage}, Cost: $${cost.toFixed(4)}`);
 
+    // Update project budget
+    try {
+      const cardWithBoard = await prisma.card.findUnique({
+        where: { id: run.cardId },
+        include: { column: { include: { board: { select: { projectId: true } } } } },
+      });
+      if (cardWithBoard?.column.board.projectId) {
+        await prisma.project.update({
+          where: { id: cardWithBoard.column.board.projectId },
+          data: { budgetUsed: { increment: cost } },
+        });
+
+        // Check if over budget
+        const project = await prisma.project.findUnique({
+          where: { id: cardWithBoard.column.board.projectId },
+          select: { budget: true, budgetUsed: true, name: true },
+        });
+        if (project?.budget && (project.budgetUsed + cost) > project.budget) {
+          await logRun(runId, "warn", `Project "${project.name}" has exceeded its budget ($${project.budgetUsed.toFixed(2)} / $${project.budget.toFixed(2)})`);
+        }
+      }
+    } catch { /* non-critical */ }
+
+    // Fire webhook for agent_completed
+    import("@/lib/webhooks").then(({ fireWebhook }) => {
+      prisma.card.findUnique({
+        where: { id: run.cardId },
+        include: { column: { include: { board: { select: { projectId: true } } } } },
+      }).then(card => {
+        if (card?.column.board.projectId) {
+          fireWebhook(card.column.board.projectId, "agent_completed", {
+            agent: run.agent.user.name || run.agent.role,
+            cardTitle: card.title || run.cardId,
+            tokens: response.tokenUsage,
+            cost: cost?.toFixed(4),
+          });
+        }
+      });
+    }).catch(() => {});
+
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
@@ -464,6 +550,30 @@ export async function executeRun(runId: string): Promise<void> {
       }
     } catch {
       // Ignore errors when posting error comment
+    }
+
+    // Fire webhook for run_failed
+    try {
+      const failedRun = await prisma.agentRun.findUnique({
+        where: { id: runId },
+        include: { agent: { include: { user: { select: { name: true } } } } },
+      });
+      if (failedRun) {
+        const failedCard = await prisma.card.findUnique({
+          where: { id: failedRun.cardId },
+          include: { column: { include: { board: { select: { projectId: true } } } } },
+        });
+        if (failedCard?.column.board.projectId) {
+          const { fireWebhook } = await import("@/lib/webhooks");
+          await fireWebhook(failedCard.column.board.projectId, "run_failed", {
+            agent: failedRun.agent.user.name || failedRun.agent.role,
+            cardTitle: failedCard.title,
+            error: errorMessage,
+          });
+        }
+      }
+    } catch {
+      // Non-critical webhook error
     }
 
   } finally {

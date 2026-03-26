@@ -35,6 +35,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn, getInitials } from "@/lib/utils";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const tabs = [
   { label: "Dashboard", href: "/" },
@@ -234,6 +235,8 @@ export function Topbar() {
             }}
           />
         </div>
+
+        <ThemeToggle />
 
         {/* Notifications bell with popover */}
         <Popover>

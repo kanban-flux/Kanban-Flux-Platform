@@ -21,6 +21,7 @@ model User {
   comments      Comment[]
   agent         Agent?
   notifications Notification[]
+  attachments   CardAttachment[]
 }
 
 model Workspace {
@@ -88,15 +89,19 @@ model Project {
   githubUrl   String?
   status      ProjectStatus @default(ACTIVE)
   autoTrigger Boolean       @default(true)   // auto-trigger agents when cards move columns
+  budget      Float?        // max budget in USD for AI token costs
+  budgetUsed  Float         @default(0)  // current spend
   workspaceId String
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  workspace  Workspace    @relation(fields: [workspaceId], references: [id])
-  boards     Board[]
-  graphNodes GraphNode[]
-  graphEdges GraphEdge[]
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id])
+  boards      Board[]
+  graphNodes  GraphNode[]
+  graphEdges  GraphEdge[]
   simulations Simulation[]
+  sprints     Sprint[]
+  webhooks    Webhook[]
 }
 
 model Column {
@@ -114,8 +119,10 @@ model Card {
   title       String
   description String?
   position    Int
+  priority    Int       @default(2)  // 0=P0 Critical, 1=P1 High, 2=P2 Medium, 3=P3 Low
   dueDate     DateTime?
   columnId    String
+  riskScore   Int?                  // 0-100, auto-calculated
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -127,6 +134,8 @@ model Card {
   agentRuns  AgentRun[]
   dependencies  CardDependency[] @relation("CardDependencies")
   dependedOnBy  CardDependency[] @relation("CardDependedOn")
+  attachments   CardAttachment[]
+  sprints    SprintCard[]
 }
 
 model Label {
@@ -393,6 +402,46 @@ model TeamTemplate {
   updatedAt   DateTime @updatedAt
 }
 
+model CardAttachment {
+  id        String   @id @default(cuid())
+  cardId    String
+  filename  String
+  fileType  String              // "code", "document", "image", "diagram"
+  mimeType  String
+  content   String              // for text files: actual content. for binary: base64 or URL
+  size      Int                 // bytes
+  createdBy String              // userId
+  createdAt DateTime @default(now())
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [createdBy], references: [id])
+}
+
+model Sprint {
+  id         String    @id @default(cuid())
+  name       String                // "Sprint 1", "Sprint 2"
+  projectId  String
+  startDate  DateTime
+  endDate    DateTime
+  status     String    @default("PLANNING")  // PLANNING, ACTIVE, COMPLETED
+  goal       String?               // sprint goal description
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  project Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  cards   SprintCard[]
+}
+
+model SprintCard {
+  sprintId String
+  cardId   String
+
+  sprint Sprint @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+  card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@id([sprintId, cardId])
+}
+
 model CardDependency {
   id          String @id @default(cuid())
   cardId      String
@@ -403,4 +452,16 @@ model CardDependency {
   dependsOn Card @relation("CardDependedOn", fields: [dependsOnId], references: [id], onDelete: Cascade)
 
   @@unique([cardId, dependsOnId])
+}
+
+model Webhook {
+  id          String   @id @default(cuid())
+  projectId   String
+  name        String              // "Slack Notifications", "Discord Updates"
+  url         String              // webhook URL
+  events      String[]            // ["card_moved", "agent_completed", "comment_added", "approval_required"]
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }

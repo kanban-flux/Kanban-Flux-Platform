@@ -32,6 +32,7 @@ export async function PATCH(
   if (body.title !== undefined) data.title = body.title;
   if (body.description !== undefined) data.description = body.description;
   if (body.dueDate !== undefined) data.dueDate = body.dueDate ? new Date(body.dueDate) : null;
+  if (body.priority !== undefined) data.priority = body.priority;
   if (body.position !== undefined) data.position = body.position;
   if (body.columnId !== undefined) data.columnId = body.columnId;
 

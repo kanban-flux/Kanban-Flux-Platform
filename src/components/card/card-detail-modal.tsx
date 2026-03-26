@@ -16,6 +16,7 @@ import {
   Trash2,
   Archive,
   Calendar,
+  Flag,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { ChecklistSection } from "./checklist";
@@ -29,6 +30,16 @@ import { AgentRunTrigger } from "@/components/agents/agent-run-trigger";
 import { AgentRunStatus } from "@/components/agents/agent-run-status";
 import { Markdown } from "@/components/ui/markdown";
 import { DependenciesSection } from "./dependencies";
+import { AttachmentsSection } from "./attachments";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { PriorityBadge } from "./priority-badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { CardWithDetails } from "@/types";
 
 export function CardDetailModal({
@@ -144,15 +155,16 @@ export function CardDetailModal({
               <MembersSection members={card.members} />
             )}
 
-            {/* Due Date */}
-            {card.dueDate && (
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-secondary" />
-                <span className="text-sm text-secondary">
-                  Due {formatDate(card.dueDate)}
-                </span>
-              </div>
-            )}
+            {/* Priority & Due Date */}
+            <div className="flex items-center gap-3">
+              <PriorityBadge priority={card.priority ?? 2} />
+              {card.dueDate && (
+                <div className="flex items-center gap-1 text-sm text-secondary">
+                  <Calendar className="h-4 w-4" />
+                  <span>Due {formatDate(card.dueDate)}</span>
+                </div>
+              )}
+            </div>
 
             {/* Description */}
             <div>
@@ -206,6 +218,10 @@ export function CardDetailModal({
             <Separator />
             <DependenciesSection cardId={card.id} boardId={boardId} />
 
+            {/* Attachments */}
+            <Separator />
+            <AttachmentsSection cardId={card.id} onUpdate={refreshCard} />
+
             {/* Checklists */}
             {card.checklists.length > 0 && (
               <>
@@ -255,6 +271,31 @@ export function CardDetailModal({
               currentDueDate={card.dueDate}
               onUpdate={refreshCard}
             />
+
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-xs text-secondary px-1">
+                <Flag className="h-3.5 w-3.5" />
+                <span>Priority</span>
+              </div>
+              <Select
+                value={String(card.priority ?? 2)}
+                onValueChange={(val) => {
+                  if (val !== null && val !== undefined) {
+                    updateCard({ priority: parseInt(String(val)) });
+                  }
+                }}
+              >
+                <SelectTrigger className="w-full h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">P0 - Critical</SelectItem>
+                  <SelectItem value="1">P1 - High</SelectItem>
+                  <SelectItem value="2">P2 - Medium</SelectItem>
+                  <SelectItem value="3">P3 - Low</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             {showChecklistInput && (
               <div className="space-y-2 rounded-lg border p-2">

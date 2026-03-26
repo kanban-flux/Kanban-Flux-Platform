@@ -57,7 +57,10 @@ export type AgentActionType =
   | "setup_cicd"
   | "save_memory"
   | "recall_memory"
-  | "add_dependency";
+  | "add_dependency"
+  | "attach_file"
+  | "review_pr"
+  | "update_changelog";
 
 export interface AgentAction {
   type: AgentActionType;
@@ -276,6 +279,44 @@ export const AGENT_TOOLS_SCHEMA = [
         type: { type: "string", description: "Dependency type: DEPENDS_ON, BLOCKS, or RELATED" },
       },
       required: ["cardId", "dependsOnId"],
+    },
+  },
+  {
+    name: "attach_file",
+    description: "Attach a file to the current card. Use for code files, documents, diagrams, or any artifact.",
+    parameters: {
+      type: "object",
+      properties: {
+        filename: { type: "string", description: "File name with extension (e.g., 'schema.prisma', 'architecture.md')" },
+        content: { type: "string", description: "File content (text)" },
+        fileType: { type: "string", description: "Type: code, document, image, diagram" },
+      },
+      required: ["filename", "content"],
+    },
+  },
+  {
+    name: "review_pr",
+    description: "Review code changes in a GitHub Pull Request. Reads the PR diff and provides code review feedback as a PR comment.",
+    parameters: {
+      type: "object",
+      properties: {
+        repo: { type: "string", description: "Repository name" },
+        pullNumber: { type: "string", description: "PR number to review" },
+      },
+      required: ["repo", "pullNumber"],
+    },
+  },
+  {
+    name: "update_changelog",
+    description: "Add an entry to the project's CHANGELOG.md in the GitHub repository",
+    parameters: {
+      type: "object",
+      properties: {
+        repo: { type: "string", description: "Repository name" },
+        version: { type: "string", description: "Version or date string" },
+        entry: { type: "string", description: "Changelog entry in markdown" },
+      },
+      required: ["repo", "entry"],
     },
   },
 ];

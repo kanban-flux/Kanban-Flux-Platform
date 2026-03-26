@@ -1,10 +1,16 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { DragDropContext, type DropResult } from "@hello-pangea/dnd";
 import { KanbanColumn } from "./column";
+import { BoardFilters } from "./board-filters";
 import { CardDetailModal } from "@/components/card/card-detail-modal";
-import type { BoardWithColumns, CardWithDetails } from "@/types";
+import type { BoardWithColumns, CardWithDetails, ColumnWithCards } from "@/types";
+
+interface FilterState {
+  label: string | null;
+  member: string | null;
+}
 
 export function BoardView({
   initialBoard,
@@ -13,12 +19,78 @@ export function BoardView({
 }) {
   const [board, setBoard] = useState(initialBoard);
   const [selectedCard, setSelectedCard] = useState<CardWithDetails | null>(null);
+  const [filters, setFilters] = useState<FilterState>({ label: null, member: null });
+  const [searchQuery, setSearchQuery] = useState("");
 
   const refreshBoard = useCallback(async () => {
     const res = await fetch(`/api/boards/${board.id}`);
     const data = await res.json();
     setBoard(data);
   }, [board.id]);
+
+  // Extract unique labels and members from board data
+  const { uniqueLabels, uniqueMembers } = useMemo(() => {
+    const labelMap = new Map<string, { id: string; name: string; color: string }>();
+    const memberMap = new Map<string, { userId: string; name: string }>();
+
+    for (const column of board.columns) {
+      for (const card of column.cards) {
+        for (const cl of card.labels) {
+          if (!labelMap.has(cl.label.id)) {
+            labelMap.set(cl.label.id, {
+              id: cl.label.id,
+              name: cl.label.name,
+              color: cl.label.color,
+            });
+          }
+        }
+        for (const cm of card.members) {
+          if (!memberMap.has(cm.user.id)) {
+            memberMap.set(cm.user.id, {
+              userId: cm.user.id,
+              name: cm.user.name,
+            });
+          }
+        }
+      }
+    }
+
+    return {
+      uniqueLabels: Array.from(labelMap.values()),
+      uniqueMembers: Array.from(memberMap.values()),
+    };
+  }, [board]);
+
+  // Filter cards within a column
+  function filterCards(cards: CardWithDetails[]): CardWithDetails[] {
+    return cards.filter((card) => {
+      // Search filter
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const titleMatch = card.title.toLowerCase().includes(q);
+        const descMatch = (card.description || "").toLowerCase().includes(q);
+        if (!titleMatch && !descMatch) return false;
+      }
+      // Label filter
+      if (filters.label && !card.labels.some((l) => l.label.name === filters.label)) {
+        return false;
+      }
+      // Member filter
+      if (filters.member && !card.members.some((m) => m.user.id === filters.member)) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  // Build filtered columns for display
+  const filteredColumns: ColumnWithCards[] = useMemo(() => {
+    return board.columns.map((col) => ({
+      ...col,
+      cards: filterCards(col.cards),
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [board.columns, filters, searchQuery]);
 
   async function onDragEnd(result: DropResult) {
     const { source, destination } = result;
@@ -82,9 +154,16 @@ export function BoardView({
         </h1>
       </div>
 
+      <BoardFilters
+        labels={uniqueLabels}
+        members={uniqueMembers}
+        onFilterChange={setFilters}
+        onSearchChange={setSearchQuery}
+      />
+
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex gap-4 overflow-x-auto pb-4">
-          {board.columns.map((column) => (
+          {filteredColumns.map((column) => (
             <KanbanColumn
               key={column.id}
               column={column}

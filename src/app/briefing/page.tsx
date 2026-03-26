@@ -18,6 +18,7 @@ import {
   Lightbulb,
   Users,
   Layers,
+  Upload,
 } from "lucide-react";
 
 export default function BriefingPage() {
@@ -171,6 +172,42 @@ export default function BriefingPage() {
                   onChange={(e) => setFeatures(e.target.value)}
                 />
               </div>
+            </div>
+
+            {/* Upload existing briefing */}
+            <div className="rounded-lg border border-dashed border-gray-300 p-4">
+              <p className="text-sm font-medium text-neutral-900 mb-2 flex items-center gap-1.5">
+                <Upload className="h-4 w-4 text-secondary" />
+                Or upload an existing briefing
+              </p>
+              <p className="text-xs text-secondary mb-2">
+                Upload a .txt, .md, or .pdf file with your project briefing
+              </p>
+              <input
+                type="file"
+                accept=".txt,.md,.pdf"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    let text: string;
+                    if (file.name.endsWith('.pdf')) {
+                      const buffer = await file.arrayBuffer();
+                      const res = await fetch('/api/briefing/parse-pdf', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/octet-stream' },
+                        body: buffer,
+                      });
+                      const data = await res.json();
+                      text = data.text;
+                    } else {
+                      text = await file.text();
+                    }
+                    setBriefing(text);
+                    setProjectName(file.name.replace(/\.(txt|md|pdf)$/i, ''));
+                  }
+                }}
+                className="text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+              />
             </div>
 
             {error && (

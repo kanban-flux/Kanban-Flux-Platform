@@ -401,8 +401,19 @@ function CreateProjectDialog({
               onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  const text = await file.text();
-                  setBriefing(text);
+                  if (file.name.endsWith('.pdf')) {
+                    const buffer = await file.arrayBuffer();
+                    const res = await fetch('/api/briefing/parse-pdf', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/octet-stream' },
+                      body: buffer,
+                    });
+                    const data = await res.json();
+                    setBriefing(data.text);
+                  } else {
+                    const text = await file.text();
+                    setBriefing(text);
+                  }
                   setBriefingFilename(file.name);
                 }
               }}

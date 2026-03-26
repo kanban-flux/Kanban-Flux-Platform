@@ -6,6 +6,7 @@ import { Bot, Calendar, CheckSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDate, getInitials } from "@/lib/utils";
+import { PriorityBadge } from "@/components/card/priority-badge";
 import type { CardWithDetails } from "@/types";
 
 export function KanbanCard({
@@ -69,8 +70,9 @@ export function KanbanCard({
               </span>
             </div>
           )}
-          {card.labels.length > 0 && (
+          {(card.labels.length > 0 || card.priority !== undefined) && (
             <div className="mb-2 flex flex-wrap gap-1">
+              <PriorityBadge priority={card.priority ?? 2} />
               {card.labels.slice(0, 3).map(({ label }) => (
                 <Badge
                   key={label.id}

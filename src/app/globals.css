@@ -26,6 +26,28 @@
     --radius: 0.75rem;
   }
 
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 13%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 13%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 215 14% 55%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 187 100% 43%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 14 100% 59%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 217 33% 20%;
+    --input: 217 33% 20%;
+    --ring: 217 91% 60%;
+  }
+
   * {
     @apply border-border;
   }
@@ -33,6 +55,59 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
+}
+
+/* Dark mode overrides for hardcoded color classes */
+.dark body {
+  background-color: hsl(222, 47%, 11%);
+  color: hsl(210, 40%, 98%);
+}
+
+.dark .bg-white {
+  background-color: hsl(222, 47%, 13%) !important;
+}
+
+.dark .bg-surface,
+.dark .bg-gray-50 {
+  background-color: hsl(222, 47%, 15%) !important;
+}
+
+.dark .text-neutral-900 {
+  color: hsl(210, 40%, 98%) !important;
+}
+
+.dark .text-secondary {
+  color: hsl(215, 14%, 55%) !important;
+}
+
+.dark .border-gray-200,
+.dark .border-gray-100 {
+  border-color: hsl(217, 33%, 20%) !important;
+}
+
+.dark .shadow-sm {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: hsl(222, 47%, 15%) !important;
+  color: hsl(210, 40%, 98%) !important;
+  border-color: hsl(217, 33%, 25%) !important;
+}
+
+.dark .bg-gray-100,
+.dark .bg-gray-200 {
+  background-color: hsl(217, 33%, 17%) !important;
+}
+
+.dark .hover\:bg-surface:hover {
+  background-color: hsl(222, 47%, 18%) !important;
+}
+
+.dark .hover\:bg-gray-200:hover {
+  background-color: hsl(217, 33%, 22%) !important;
 }
 
 @keyframes agent-glow {

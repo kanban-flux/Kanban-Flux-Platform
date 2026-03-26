@@ -97,6 +97,28 @@ export async function mergePullRequest(repo: string, pullNumber: number) {
   return data;
 }
 
+export async function getPRDiff(repo: string, pullNumber: number): Promise<string> {
+  const octokit = getOctokit();
+  const { data } = await octokit.rest.pulls.get({
+    owner: ORG_NAME,
+    repo,
+    pull_number: pullNumber,
+    mediaType: { format: "diff" },
+  });
+  return data as unknown as string;
+}
+
+export async function commentOnPR(repo: string, pullNumber: number, body: string) {
+  const octokit = getOctokit();
+  const { data } = await octokit.rest.issues.createComment({
+    owner: ORG_NAME,
+    repo,
+    issue_number: pullNumber,
+    body,
+  });
+  return data;
+}
+
 export async function listRepos() {
   const octokit = getOctokit();
   const { data } = await octokit.rest.repos.listForOrg({
