@@ -87,6 +87,7 @@ model Project {
   githubRepo  String?
   githubUrl   String?
   status      ProjectStatus @default(ACTIVE)
+  autoTrigger Boolean       @default(true)   // auto-trigger agents when cards move columns
   workspaceId String
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt

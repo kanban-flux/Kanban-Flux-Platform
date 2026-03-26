@@ -43,12 +43,13 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   const body = await req.json();
-  const { name, description, status, githubRepo, githubUrl } = body as {
+  const { name, description, status, githubRepo, githubUrl, autoTrigger } = body as {
     name?: string;
     description?: string;
     status?: string;
     githubRepo?: string;
     githubUrl?: string;
+    autoTrigger?: boolean;
   };
 
   const data: Record<string, unknown> = {};
@@ -57,6 +58,7 @@ export async function PATCH(
   if (status !== undefined) data.status = status;
   if (githubRepo !== undefined) data.githubRepo = githubRepo;
   if (githubUrl !== undefined) data.githubUrl = githubUrl;
+  if (autoTrigger !== undefined) data.autoTrigger = autoTrigger;
 
   const project = await prisma.project.update({
     where: { id: params.id },

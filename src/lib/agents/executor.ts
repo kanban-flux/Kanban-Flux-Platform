@@ -47,6 +47,8 @@ async function applyAction(action: AgentAction, cardId: string, agentUserId: str
 
     case "move_card": {
       const { columnId } = action.payload as { columnId: string };
+      // Get old columnId before moving for auto-trigger
+      const oldCard = await prisma.card.findUnique({ where: { id: cardId }, select: { columnId: true } });
       // Get the max position in the target column
       const maxPos = await prisma.card.aggregate({
         where: { columnId },
@@ -65,6 +67,12 @@ async function applyAction(action: AgentAction, cardId: string, agentUserId: str
         message: `Card moved to "${targetCol?.title || "column"}"`,
       });
       await logRun(runId, "info", `Moved card to column ${columnId}`);
+      // Auto-trigger agent on column change (won't double-trigger due to activeRun check)
+      if (oldCard && columnId !== oldCard.columnId) {
+        import("./auto-trigger").then(({ handleCardColumnChange }) => {
+          handleCardColumnChange(cardId, columnId, oldCard.columnId).catch(console.error);
+        });
+      }
       break;
     }
 

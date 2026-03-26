@@ -51,6 +51,7 @@ export async function GET() {
       githubRepo: project.githubRepo,
       githubUrl: project.githubUrl,
       status: project.status,
+      autoTrigger: project.autoTrigger,
       createdAt: project.createdAt,
       updatedAt: project.updatedAt,
       boardCount,

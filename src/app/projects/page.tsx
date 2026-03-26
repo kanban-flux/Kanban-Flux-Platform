@@ -37,6 +37,8 @@ import {
   Trash2,
   CheckCircle2,
   FolderGit2,
+  Zap,
+  ZapOff,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -48,6 +50,7 @@ interface ProjectSummary {
   githubRepo: string | null;
   githubUrl: string | null;
   status: string;
+  autoTrigger: boolean;
   createdAt: string;
   updatedAt: string;
   boardCount: number;
@@ -121,6 +124,15 @@ export default function ProjectsPage() {
     fetchProjects();
   }
 
+  async function toggleAutoTrigger(id: string, autoTrigger: boolean) {
+    await fetch(`/api/projects/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ autoTrigger }),
+    });
+    fetchProjects();
+  }
+
   return (
     <AppLayout>
       <div className="space-y-8">
@@ -189,6 +201,17 @@ export default function ProjectsPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
+                          onClick={() => toggleAutoTrigger(project.id, !project.autoTrigger)}
+                        >
+                          {project.autoTrigger ? (
+                            <ZapOff className="mr-2 h-4 w-4" />
+                          ) : (
+                            <Zap className="mr-2 h-4 w-4" />
+                          )}
+                          {project.autoTrigger ? "Disable Auto-trigger" : "Enable Auto-trigger"}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
                           onClick={() => handleCompleteProject(project.id)}
                         >
                           <CheckCircle2 className="mr-2 h-4 w-4" />
@@ -247,6 +270,13 @@ export default function ProjectsPage() {
                             {project.agentCount !== 1 ? "s" : ""}
                           </div>
                         )}
+                        {/* Auto-trigger indicator */}
+                        <div className="flex items-center gap-1 text-xs">
+                          <div className={`h-2 w-2 rounded-full ${project.autoTrigger ? 'bg-green-500' : 'bg-gray-300'}`} />
+                          <span className={project.autoTrigger ? 'text-green-600' : 'text-secondary'}>
+                            {project.autoTrigger ? 'Auto' : 'Manual'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>

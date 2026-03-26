@@ -35,6 +35,12 @@ export async function PATCH(
   if (body.position !== undefined) data.position = body.position;
   if (body.columnId !== undefined) data.columnId = body.columnId;
 
+  // Fetch existing card before update to detect column changes
+  const existingCard = await prisma.card.findUnique({
+    where: { id: params.id },
+    select: { columnId: true },
+  });
+
   const card = await prisma.card.update({
     where: { id: params.id },
     data,
@@ -48,6 +54,14 @@ export async function PATCH(
       },
     },
   });
+
+  // Auto-trigger agent if column changed (card moved)
+  if (body.columnId && existingCard && body.columnId !== existingCard.columnId) {
+    import("@/lib/agents/auto-trigger").then(({ handleCardColumnChange }) => {
+      handleCardColumnChange(params.id, body.columnId, existingCard.columnId).catch(console.error);
+    });
+  }
+
   return NextResponse.json(card);
 }
 
