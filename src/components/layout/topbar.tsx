@@ -194,7 +194,7 @@ export function Topbar() {
     <header className="flex h-14 items-center justify-between border-b border-gray-200 bg-white px-6">
       <div className="flex items-center gap-1">
         <span className="mr-4 text-lg font-semibold text-primary">
-          KanbanFlux
+          Kanban Flux <span className="text-xs font-normal text-muted-foreground">by Lumys</span>
         </span>
         <nav className="flex items-center gap-1">
           {tabs.map((tab) => {

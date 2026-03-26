@@ -10,7 +10,7 @@ export function Footer() {
         <HelpCircle className="h-3.5 w-3.5" />
         <span>Help Center</span>
       </a>
-      <span>&copy; 2024 Kanban Flux. by ENI Ethereal Nexus Institute - A Think Tank &amp; Science - All rights reserved.</span>
+      <span>&copy; 2024 <span className="font-medium text-primary">Kanban Flux</span> by <span className="font-medium text-primary">Lumys</span> &mdash; ENI Ethereal Nexus Institute - A Think Tank &amp; Science - All rights reserved.</span>
       <div className="flex items-center gap-4">
         <a href="#" className="hover:text-neutral-900 cursor-pointer transition-colors">Privacy Policy</a>
         <a href="#" className="hover:text-neutral-900 cursor-pointer transition-colors">Terms of Service</a>

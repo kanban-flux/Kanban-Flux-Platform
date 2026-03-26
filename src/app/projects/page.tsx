@@ -60,11 +60,11 @@ interface ProjectSummary {
 }
 
 const projectCovers = [
-  "from-primary to-primary-400",
-  "from-tertiary to-blue-400",
-  "from-purple-500 to-pink-500",
-  "from-success to-emerald-400",
-  "from-warning to-orange-400",
+  "from-[#432776] to-[#6B3FA0]",       // Lumys violet
+  "from-[#432776] to-purple-400",        // violet to light purple
+  "from-purple-600 to-pink-500",         // purple to pink
+  "from-[#432776] to-blue-400",          // violet to blue
+  "from-emerald-500 to-teal-400",        // accent green
 ];
 
 export default function ProjectsPage() {

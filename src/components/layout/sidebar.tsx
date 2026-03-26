@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
+  Bird,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -48,17 +49,17 @@ export function Sidebar() {
       <div className="flex h-14 items-center justify-between border-b border-gray-200 px-4">
         {!collapsed && (
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white text-sm font-bold">
-              K
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white">
+              <Bird className="h-5 w-5" />
             </div>
-            <span className="text-lg font-semibold text-neutral-900">
+            <span className="text-lg font-semibold text-primary">
               Kanban Flux
             </span>
           </Link>
         )}
         {collapsed && (
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white text-sm font-bold mx-auto">
-            K
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white mx-auto">
+            <Bird className="h-5 w-5" />
           </div>
         )}
       </div>
