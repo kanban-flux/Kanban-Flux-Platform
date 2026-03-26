@@ -230,6 +230,7 @@ model Agent {
   status        AgentStatus   @default(IDLE)
   apiKeyId      String?
   maxConcurrent Int           @default(1)
+  executionMode String        @default("bullmq")  // "bullmq" or "lumys"
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 

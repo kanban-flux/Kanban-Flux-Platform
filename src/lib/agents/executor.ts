@@ -3,6 +3,7 @@ import { getProvider } from "./provider";
 import { buildTaskContext } from "./context-builder";
 import { decrypt } from "./crypto";
 import type { AgentAction } from "./types";
+import { AGENT_TOOLS_SCHEMA } from "./types";
 import type { Prisma, AgentProvider as AgentProviderType } from "@prisma/client";
 
 const MAX_EXECUTION_TIME = 5 * 60 * 1000; // 5 minutes
@@ -492,6 +493,72 @@ export async function executeRun(runId: string): Promise<void> {
 
     // Build task context
     const context = await buildTaskContext(run.cardId, run.agentId);
+
+    // Check execution mode
+    if (run.agent.executionMode === "lumys") {
+      await logRun(runId, "info", "Executing via Lumys OS runtime");
+
+      const { executeViaLumys, mapToolsToCapabilities, isLumysAvailable } = await import("./lumys-bridge");
+
+      const available = await isLumysAvailable();
+      if (!available) {
+        await logRun(runId, "warn", "Lumys OS not available, falling back to BullMQ provider");
+        // Fall through to normal execution below
+      } else {
+        try {
+          const taskMessage = `## Task: ${context.card.title}\n\n${context.card.description || ""}\n\n## Board: ${context.card.board.name}\n## Column: ${context.card.column.title}\n\n${context.boardColumns.map(c => `- ${c.title} (${c.id})`).join("\n")}`;
+
+          const capabilities = mapToolsToCapabilities(AGENT_TOOLS_SCHEMA.map(t => t.name));
+
+          const result = await executeViaLumys({
+            name: run.agent.user?.name || run.agent.role,
+            role: run.agent.role,
+            systemPrompt: run.agent.systemPrompt || "",
+            model: run.agent.model,
+            provider: run.agent.provider,
+            capabilities,
+          }, taskMessage);
+
+          // Process tool calls from Lumys OS response
+          if (result.tool_calls) {
+            for (const tc of result.tool_calls) {
+              try {
+                await applyAction(
+                  { type: tc.name as AgentAction["type"], payload: tc.arguments },
+                  run.cardId,
+                  run.agent.user.id,
+                  runId,
+                  run.agentId,
+                );
+              } catch (actionError) {
+                await logRun(runId, "error", `Failed action ${tc.name}: ${actionError instanceof Error ? actionError.message : String(actionError)}`);
+              }
+            }
+          }
+
+          // If there's a text response, post as comment
+          if (result.response) {
+            await prisma.comment.create({
+              data: { text: result.response, userId: run.agent.user.id, cardId: run.cardId },
+            });
+          }
+
+          const tokenUsage = result.usage?.total_tokens || 0;
+          const cost = tokenUsage * 0.00000015; // approximate
+
+          await prisma.agentRun.update({
+            where: { id: runId },
+            data: { status: "COMPLETED", completedAt: new Date(), tokenUsage, cost },
+          });
+
+          await logRun(runId, "info", `Lumys OS execution completed. Tokens: ${tokenUsage}`);
+          return; // Skip normal execution
+        } catch (lumysError) {
+          await logRun(runId, "warn", `Lumys OS failed: ${lumysError instanceof Error ? lumysError.message : String(lumysError)}. Falling back to BullMQ.`);
+          // Fall through to normal execution
+        }
+      }
+    }
 
     // Get provider and execute
     const provider = getProvider(run.agent.provider);

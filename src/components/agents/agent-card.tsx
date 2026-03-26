@@ -90,6 +90,7 @@ export interface AgentData {
   status: "IDLE" | "WORKING" | "PAUSED" | "ERROR";
   apiKeyId: string | null;
   maxConcurrent: number;
+  executionMode?: string;
   createdAt: string;
   updatedAt: string;
   user: {

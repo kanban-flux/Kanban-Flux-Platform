@@ -8,6 +8,7 @@ import { EditAgentModal } from "@/components/agents/edit-agent-modal";
 import { ApiKeyManager } from "@/components/agents/api-key-manager";
 import { AgentImport } from "@/components/agents/agent-import";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bot, Plus, Upload, ChevronDown, ChevronRight } from "lucide-react";
 import type { AgentData } from "@/components/agents/agent-card";
@@ -21,6 +22,7 @@ export default function AgentsPage() {
   const [editAgent, setEditAgent] = useState<AgentData | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [importCollapsed, setImportCollapsed] = useState(true);
+  const [lumysStatus, setLumysStatus] = useState<"checking" | "online" | "offline">("checking");
 
   const fetchAgents = useCallback(async () => {
     setLoading(true);
@@ -44,6 +46,13 @@ export default function AgentsPage() {
   useEffect(() => {
     fetchAgents();
   }, [fetchAgents]);
+
+  useEffect(() => {
+    fetch("/api/agents/lumys-status")
+      .then(r => r.json())
+      .then(d => setLumysStatus(d.available ? "online" : "offline"))
+      .catch(() => setLumysStatus("offline"));
+  }, []);
 
   async function handleDelete(agent: AgentData) {
     if (!confirm(`Delete agent "${agent.user.name}"? This action cannot be undone.`)) {
@@ -71,6 +80,12 @@ export default function AgentsPage() {
               <h1 className="text-2xl font-semibold text-neutral-900">
                 AI Agents
               </h1>
+              {lumysStatus === "online" && (
+                <Badge className="bg-green-100 text-green-700">Lumys OS Online</Badge>
+              )}
+              {lumysStatus === "offline" && (
+                <Badge variant="outline" className="text-secondary">Lumys OS Offline</Badge>
+              )}
             </div>
             <p className="mt-1 text-secondary">
               Manage your autonomous AI workforce

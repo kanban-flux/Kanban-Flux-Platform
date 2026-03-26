@@ -75,6 +75,7 @@ export async function PATCH(
     status,
     apiKeyId,
     maxConcurrent,
+    executionMode,
   } = body;
 
   const agent = await prisma.agent.findUnique({
@@ -101,6 +102,7 @@ export async function PATCH(
   if (status !== undefined) agentData.status = status;
   if (apiKeyId !== undefined) agentData.apiKeyId = apiKeyId;
   if (maxConcurrent !== undefined) agentData.maxConcurrent = maxConcurrent;
+  if (executionMode !== undefined) agentData.executionMode = executionMode;
 
   const updated = await prisma.agent.update({
     where: { id: params.id },
