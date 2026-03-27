@@ -5,31 +5,13 @@ import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import {
   Store,
   Rocket,
   Users,
-  Download,
   CheckCircle2,
   Loader2,
   Bot,
-  Server,
-  BarChart3,
-  Globe,
-  LayoutTemplate,
   Columns3,
-  CreditCard,
 } from "lucide-react";
 
 /* -------------------------------------------------------------------------- */
@@ -92,20 +74,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   data: "Data & AI",
 };
 
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  saas: <Rocket className="h-4 w-4" />,
-  "landing-page": <Globe className="h-4 w-4" />,
-  api: <Server className="h-4 w-4" />,
-  data: <BarChart3 className="h-4 w-4" />,
-};
-
-const CATEGORY_COLORS: Record<string, string> = {
-  saas: "bg-blue-100 text-blue-800",
-  "landing-page": "bg-green-100 text-green-800",
-  api: "bg-purple-100 text-purple-800",
-  data: "bg-amber-100 text-amber-800",
-};
-
 /* -------------------------------------------------------------------------- */
 /*  Page                                                                      */
 /* -------------------------------------------------------------------------- */
@@ -118,7 +86,8 @@ export default function MarketplacePage() {
   const [deploying, setDeploying] = useState<string | null>(null);
   const [deployingBoard, setDeployingBoard] = useState<string | null>(null);
   const [deployResult, setDeployResult] = useState<DeployResult | null>(null);
-  const [boardDeployResult, setBoardDeployResult] = useState<BoardDeployResult | null>(null);
+  const [boardDeployResult, setBoardDeployResult] =
+    useState<BoardDeployResult | null>(null);
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeTab, setActiveTab] = useState("teams");
 
@@ -205,324 +174,246 @@ export default function MarketplacePage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-5xl">
         {/* Header */}
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-              <Store className="h-5 w-5 text-primary" />
-            </div>
+          <h1 className="text-2xl font-semibold text-neutral-900 flex items-center gap-2">
+            <Store className="h-6 w-6 text-primary" />
+            Agent Marketplace
+          </h1>
+          <p className="text-secondary mt-1">
+            Pre-built AI teams ready to deploy
+          </p>
+        </div>
+
+        {/* Tab buttons (Teams / Boards) */}
+        <div className="flex gap-2">
+          <Button
+            variant={activeTab === "teams" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setActiveTab("teams")}
+          >
+            <Users className="h-4 w-4 mr-1.5" />
+            Team Templates
+          </Button>
+          <Button
+            variant={activeTab === "boards" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setActiveTab("boards")}
+          >
+            <Columns3 className="h-4 w-4 mr-1.5" />
+            Board Templates
+          </Button>
+        </div>
+
+        {/* Category filter - simple buttons */}
+        <div className="flex gap-2 flex-wrap">
+          {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+            <Button
+              key={key}
+              variant={activeCategory === key ? "default" : "outline"}
+              size="sm"
+              className="text-xs h-7"
+              onClick={() => setActiveCategory(key)}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
+
+        {/* Deploy success banner (teams) */}
+        {deployResult && (
+          <div className="rounded-lg border border-green-200 bg-green-50 p-4 flex items-center gap-3">
+            <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
             <div>
-              <h1 className="text-2xl font-bold text-neutral-900">
-                Agent Marketplace
-              </h1>
-              <p className="text-sm text-secondary">
-                Pre-built AI teams ready to deploy
+              <p className="font-medium text-green-900">
+                Team &quot;{deployResult.templateName}&quot; deployed!
+              </p>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {deployResult.agents.map((a) => (
+                  <Badge key={a.role} variant="secondary" className="text-xs">
+                    {a.role} ({a.status})
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Deploy success banner (boards) */}
+        {boardDeployResult && (
+          <div className="rounded-lg border border-green-200 bg-green-50 p-4 flex items-center gap-3">
+            <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+            <div>
+              <p className="font-medium text-green-900">
+                Board &quot;{boardDeployResult.boardName}&quot; created!
+              </p>
+              <p className="text-sm text-green-800 mt-0.5">
+                {boardDeployResult.columnsCreated} columns and{" "}
+                {boardDeployResult.cardsCreated} cards created.
               </p>
             </div>
           </div>
-        </div>
-
-        {/* Deploy result banners */}
-        {deployResult && (
-          <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              <h3 className="font-semibold text-green-900">
-                Team &quot;{deployResult.templateName}&quot; deployed
-                successfully!
-              </h3>
-            </div>
-            <div className="flex flex-wrap gap-2 ml-7">
-              {deployResult.agents.map((agent) => (
-                <Badge
-                  key={agent.role}
-                  variant={
-                    agent.status === "created" ? "default" : "secondary"
-                  }
-                  className="text-xs"
-                >
-                  {agent.role}{" "}
-                  {agent.status === "created" ? "(created)" : "(exists)"}
-                </Badge>
-              ))}
-            </div>
-          </div>
         )}
 
-        {boardDeployResult && (
-          <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              <h3 className="font-semibold text-green-900">
-                Board &quot;{boardDeployResult.boardName}&quot; created
-                successfully!
-              </h3>
-            </div>
-            <p className="ml-7 text-sm text-green-800">
-              {boardDeployResult.columnsCreated} columns and {boardDeployResult.cardsCreated} cards created.
-            </p>
-          </div>
-        )}
-
-        {/* Main tabs: Teams vs Boards */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
-            <TabsTrigger value="teams" className="gap-1.5">
-              <Users className="h-4 w-4" />
-              Team Templates
-            </TabsTrigger>
-            <TabsTrigger value="boards" className="gap-1.5">
-              <LayoutTemplate className="h-4 w-4" />
-              Board Templates
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Category filter */}
-          <div className="mt-4">
-            <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-              <TabsList>
-                {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                  <TabsTrigger key={key} value={key}>
-                    {label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-          </div>
-
-          <TabsContent value="teams" className="mt-4">
+        {/* Team templates grid */}
+        {activeTab === "teams" && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {loading ? (
-              <div className="flex items-center justify-center py-20">
+              <div className="col-span-full flex justify-center py-20">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-secondary">
-                <Store className="h-12 w-12 mb-3 opacity-40" />
-                <p className="text-lg font-medium">No templates found</p>
-                <p className="text-sm">Try a different category filter</p>
+              <div className="col-span-full text-center py-20 text-secondary">
+                <p>No templates found</p>
               </div>
             ) : (
-              <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-                {filtered.map((template) => (
-                  <Card
-                    key={template.id}
-                    className="flex flex-col border border-gray-200 shadow-sm transition-shadow hover:shadow-lg"
-                  >
-                    <CardHeader className="pb-3 px-5">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                            {CATEGORY_ICONS[template.category] || (
-                              <Bot className="h-4 w-4 text-primary" />
-                            )}
-                          </div>
-                          <CardTitle className="text-lg leading-tight truncate">
-                            {template.name}
-                          </CardTitle>
-                        </div>
+              filtered.map((template) => (
+                <div
+                  key={template.id}
+                  className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col"
+                >
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="font-semibold text-neutral-900">
+                      {template.name}
+                    </h3>
+                    <Badge
+                      variant="secondary"
+                      className="text-xs shrink-0 ml-2"
+                    >
+                      {CATEGORY_LABELS[template.category] || template.category}
+                    </Badge>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-sm text-secondary line-clamp-2 mb-4">
+                    {template.description}
+                  </p>
+
+                  {/* Agents */}
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-neutral-500 uppercase mb-1.5">
+                      Agents ({template.agents.length})
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {template.agents.map((a) => (
                         <Badge
-                          className={`text-xs shrink-0 ${
-                            CATEGORY_COLORS[template.category] || ""
-                          }`}
-                          variant="secondary"
+                          key={a.role}
+                          variant="outline"
+                          className="text-xs"
                         >
-                          {CATEGORY_LABELS[template.category] ||
-                            template.category}
+                          <Bot className="h-3 w-3 mr-1" />
+                          {a.name}
                         </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="flex flex-1 flex-col gap-4 px-5">
-                      <p className="text-sm text-secondary leading-relaxed">
-                        {template.description}
-                      </p>
+                      ))}
+                    </div>
+                  </div>
 
-                      {/* Agent list */}
-                      <div className="space-y-2">
-                        <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                          Agents ({template.agents.length})
-                        </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {template.agents.map((agent) => (
-                            <Badge
-                              key={agent.role}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              <Bot className="h-3 w-3 mr-1" />
-                              {agent.name}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Footer */}
-                      <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-200">
-                        <div className="flex items-center gap-3 text-xs text-secondary">
-                          <span className="flex items-center gap-1">
-                            <Users className="h-3.5 w-3.5" />
-                            {template.agents.length} agents
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Download className="h-3.5 w-3.5" />
-                            {template.usageCount} deploys
-                          </span>
-                        </div>
-                        <Button
-                          size="sm"
-                          onClick={() => handleDeploy(template.id)}
-                          disabled={deploying === template.id}
-                        >
-                          {deploying === template.id ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                              Deploying...
-                            </>
-                          ) : (
-                            <>
-                              <Rocket className="h-4 w-4 mr-1" />
-                              Deploy Team
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                  {/* Footer */}
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
+                    <span className="text-xs text-secondary">
+                      {template.agents.length} agents &middot;{" "}
+                      {template.usageCount} deploys
+                    </span>
+                    <Button
+                      size="sm"
+                      onClick={() => handleDeploy(template.id)}
+                      disabled={deploying === template.id}
+                    >
+                      {deploying === template.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Rocket className="h-4 w-4 mr-1" /> Deploy Team
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              ))
             )}
-          </TabsContent>
+          </div>
+        )}
 
-          <TabsContent value="boards" className="mt-4">
+        {/* Board templates grid */}
+        {activeTab === "boards" && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {boardsLoading ? (
-              <div className="flex items-center justify-center py-20">
+              <div className="col-span-full flex justify-center py-20">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : filteredBoards.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-secondary">
-                <LayoutTemplate className="h-12 w-12 mb-3 opacity-40" />
-                <p className="text-lg font-medium">No board templates found</p>
-                <p className="text-sm">Try a different category filter</p>
+              <div className="col-span-full text-center py-20 text-secondary">
+                <p>No board templates found</p>
               </div>
             ) : (
-              <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-                {filteredBoards.map((template) => (
-                  <Card
-                    key={template.id}
-                    className="flex flex-col border border-gray-200 shadow-sm transition-shadow hover:shadow-lg"
-                  >
-                    <CardHeader className="pb-3 px-5">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                            {CATEGORY_ICONS[template.category] || (
-                              <LayoutTemplate className="h-4 w-4 text-primary" />
-                            )}
-                          </div>
-                          <CardTitle className="text-lg leading-tight truncate">
-                            {template.name}
-                          </CardTitle>
-                        </div>
+              filteredBoards.map((template) => (
+                <div
+                  key={template.id}
+                  className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col"
+                >
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="font-semibold text-neutral-900">
+                      {template.name}
+                    </h3>
+                    <Badge
+                      variant="secondary"
+                      className="text-xs shrink-0 ml-2"
+                    >
+                      {CATEGORY_LABELS[template.category] || template.category}
+                    </Badge>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-sm text-secondary line-clamp-2 mb-4">
+                    {template.description}
+                  </p>
+
+                  {/* Columns */}
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-neutral-500 uppercase mb-1.5">
+                      Columns
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {template.columns.map((col) => (
                         <Badge
-                          className={`text-xs shrink-0 ${
-                            CATEGORY_COLORS[template.category] || ""
-                          }`}
-                          variant="secondary"
+                          key={col}
+                          variant="outline"
+                          className="text-xs"
                         >
-                          {CATEGORY_LABELS[template.category] ||
-                            template.category}
+                          {col}
                         </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="flex flex-1 flex-col gap-4 px-5">
-                      <p className="text-sm text-secondary leading-relaxed">
-                        {template.description}
-                      </p>
+                      ))}
+                    </div>
+                  </div>
 
-                      {/* Columns */}
-                      <div className="space-y-2">
-                        <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                          Columns ({template.columns.length})
-                        </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {template.columns.map((col) => (
-                            <Badge
-                              key={col}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              <Columns3 className="h-3 w-3 mr-1" />
-                              {col}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Card templates */}
-                      {template.cardTemplates && template.cardTemplates.length > 0 && (
-                        <div className="space-y-2">
-                          <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                            Cards ({template.cardTemplates.length})
-                          </p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {template.cardTemplates.slice(0, 4).map((ct) => (
-                              <Badge
-                                key={ct.title}
-                                variant="outline"
-                                className="text-xs"
-                              >
-                                <CreditCard className="h-3 w-3 mr-1" />
-                                {ct.title}
-                              </Badge>
-                            ))}
-                            {template.cardTemplates.length > 4 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{template.cardTemplates.length - 4} more
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
+                  {/* Footer */}
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
+                    <span className="text-xs text-secondary">
+                      {template.columns.length} columns &middot;{" "}
+                      {template.cardTemplates?.length || 0} cards
+                    </span>
+                    <Button
+                      size="sm"
+                      onClick={() => handleDeployBoard(template.id)}
+                      disabled={deployingBoard === template.id}
+                    >
+                      {deployingBoard === template.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Rocket className="h-4 w-4 mr-1" /> Create Board
+                        </>
                       )}
-
-                      {/* Footer */}
-                      <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-200">
-                        <div className="flex items-center gap-3 text-xs text-secondary">
-                          <span className="flex items-center gap-1">
-                            <Columns3 className="h-3.5 w-3.5" />
-                            {template.columns.length} columns
-                          </span>
-                          {template.cardTemplates && (
-                            <span className="flex items-center gap-1">
-                              <CreditCard className="h-3.5 w-3.5" />
-                              {template.cardTemplates.length} cards
-                            </span>
-                          )}
-                        </div>
-                        <Button
-                          size="sm"
-                          onClick={() => handleDeployBoard(template.id)}
-                          disabled={deployingBoard === template.id}
-                        >
-                          {deployingBoard === template.id ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                              Creating...
-                            </>
-                          ) : (
-                            <>
-                              <Rocket className="h-4 w-4 mr-1" />
-                              Create Board
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                    </Button>
+                  </div>
+                </div>
+              ))
             )}
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
       </div>
     </AppLayout>
   );
