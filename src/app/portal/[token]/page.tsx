@@ -87,7 +87,7 @@ export default function ClientPortal({ params }: { params: Promise<{ token: stri
         </div>
 
         <p className="text-center text-xs text-secondary">
-          Powered by Kanban Flux - AI Agent Orchestration Platform
+          Powered by Kanban Flux - AI Agent Project Building Platform
         </p>
       </div>
     </div>

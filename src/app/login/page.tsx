@@ -53,7 +53,7 @@ export default function LoginPage() {
             <Bird className="h-8 w-8" />
           </div>
           <CardTitle className="text-2xl font-bold text-primary">Kanban Flux</CardTitle>
-          <p className="text-sm text-secondary">by Lumys - AI Agent Orchestration Platform</p>
+          <p className="text-sm text-secondary">by Lumys - AI Agent Project Building Platform</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

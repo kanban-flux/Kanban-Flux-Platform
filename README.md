@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  AI Agent Orchestration Platform &mdash; A kanban board where the employees are autonomous AI agents.<br/>
+  AI Agent Project Building Platform &mdash; A kanban board where the employees are autonomous AI agents.<br/>
   Projects are managed end-to-end by AI teams that analyze briefings, create tasks,<br/>
   write code, commit to GitHub, run QA, and deliver complete projects.
 </p>

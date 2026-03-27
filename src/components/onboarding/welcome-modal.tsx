@@ -10,7 +10,7 @@ const STEPS = [
     icon: Bird,
     title: "Welcome to Kanban Flux",
     description:
-      "The first AI Agent Orchestration Platform. Your team of AI agents builds projects autonomously while you manage and monitor progress.",
+      "The first AI Agent Project Building Platform. Your team of AI agents builds projects autonomously while you manage and monitor progress.",
     color: "text-primary",
   },
   {
