@@ -61,19 +61,6 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  lumys:
-    build:
-      context: .
-      dockerfile: Dockerfile.lumys
-    ports:
-      - "4200:4200"
-    environment:
-      LLM_PROVIDER: gemini
-      LLM_API_KEY: ${GEMINI_API_KEY}
-      LUMYS_HOST: "0.0.0.0"
-      LUMYS_PORT: "4200"
-    restart: unless-stopped
-
 volumes:
   postgres_data:
   redis_data:

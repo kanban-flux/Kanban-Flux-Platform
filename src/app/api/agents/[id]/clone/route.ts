@@ -35,7 +35,6 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         capabilities: original.capabilities,
         apiKeyId: original.apiKeyId,
         maxConcurrent: original.maxConcurrent,
-        executionMode: original.executionMode,
       },
       include: { user: { select: { id: true, name: true, email: true, avatar: true } } },
     });

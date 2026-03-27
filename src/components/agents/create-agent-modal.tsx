@@ -102,7 +102,6 @@ export function CreateAgentModal({
   const [capabilities, setCapabilities] = useState("");
   const [apiKeyId, setApiKeyId] = useState("");
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
-  const [executionMode, setExecutionMode] = useState("bullmq");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -139,7 +138,6 @@ export function CreateAgentModal({
     setSystemPrompt("");
     setCapabilities("");
     setApiKeyId("");
-    setExecutionMode("bullmq");
     setError("");
   }
 
@@ -166,7 +164,6 @@ export function CreateAgentModal({
           systemPrompt: systemPrompt || null,
           capabilities: capsArray,
           apiKeyId: apiKeyId || null,
-          executionMode,
         }),
       });
 
@@ -271,21 +268,6 @@ export function CreateAgentModal({
                 required
               />
             </div>
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-neutral-900">
-              Execution Runtime
-            </label>
-            <Select value={executionMode} onValueChange={(val) => val && setExecutionMode(val)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="bullmq">BullMQ Worker (Standard)</SelectItem>
-                <SelectItem value="lumys">Lumys OS (Advanced - Sandbox + Security)</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <div>

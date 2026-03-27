@@ -61,7 +61,6 @@ export async function POST(req: NextRequest) {
     systemPrompt,
     capabilities,
     apiKeyId,
-    executionMode,
     workspaceId,
   } = body;
 
@@ -92,7 +91,6 @@ export async function POST(req: NextRequest) {
       systemPrompt: systemPrompt || null,
       capabilities: capabilities || [],
       apiKeyId: apiKeyId || null,
-      executionMode: executionMode || "bullmq",
     },
     include: {
       user: {

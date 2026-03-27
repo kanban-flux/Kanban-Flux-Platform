@@ -27,25 +27,25 @@
   }
 
   .dark {
-    --background: 261 30% 8%;        /* dark violet-tinted background */
-    --foreground: 261 10% 95%;
-    --card: 261 25% 11%;
-    --card-foreground: 261 10% 95%;
-    --popover: 261 25% 11%;
-    --popover-foreground: 261 10% 95%;
-    --primary: 261 60% 55%;          /* brighter violet for dark mode */
-    --primary-foreground: 261 30% 8%;
-    --secondary: 261 15% 55%;
-    --secondary-foreground: 261 30% 8%;
-    --muted: 261 20% 15%;
-    --muted-foreground: 261 15% 60%;
-    --accent: 261 60% 60%;
-    --accent-foreground: 261 30% 8%;
+    --background: 260 20% 10%;
+    --foreground: 0 0% 95%;
+    --card: 260 15% 14%;
+    --card-foreground: 0 0% 95%;
+    --popover: 260 15% 14%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 261 60% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 260 10% 60%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 260 15% 18%;
+    --muted-foreground: 260 10% 65%;
+    --accent: 261 50% 55%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 261 20% 18%;
-    --input: 261 20% 18%;
-    --ring: 261 60% 55%;
+    --border: 260 12% 22%;
+    --input: 260 12% 22%;
+    --ring: 261 60% 60%;
   }
 
   * {
@@ -57,57 +57,74 @@
   }
 }
 
-/* Dark mode overrides for hardcoded color classes — Lumys violet theme */
+/* Dark mode overrides for hardcoded classes */
 .dark body {
-  background-color: hsl(261, 30%, 8%);
-  color: hsl(261, 10%, 95%);
+  background-color: hsl(260, 20%, 10%);
+  color: hsl(0, 0%, 95%);
 }
 
 .dark .bg-white {
-  background-color: hsl(261, 25%, 11%) !important;
+  background-color: hsl(260, 15%, 14%) !important;
 }
 
 .dark .bg-surface,
 .dark .bg-gray-50 {
-  background-color: hsl(261, 25%, 13%) !important;
+  background-color: hsl(260, 15%, 17%) !important;
 }
 
 .dark .text-neutral-900 {
-  color: hsl(261, 10%, 95%) !important;
+  color: hsl(0, 0%, 95%) !important;
 }
 
 .dark .text-secondary {
-  color: hsl(261, 15%, 55%) !important;
+  color: hsl(260, 10%, 65%) !important;
 }
 
 .dark .border-gray-200,
 .dark .border-gray-100 {
-  border-color: hsl(261, 20%, 18%) !important;
+  border-color: hsl(260, 12%, 25%) !important;
 }
 
 .dark .shadow-sm {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
 }
 
 .dark input,
 .dark textarea,
 .dark select {
-  background-color: hsl(261, 25%, 13%) !important;
-  color: hsl(261, 10%, 95%) !important;
-  border-color: hsl(261, 20%, 22%) !important;
+  background-color: hsl(260, 15%, 17%) !important;
+  color: hsl(0, 0%, 95%) !important;
+  border-color: hsl(260, 12%, 28%) !important;
 }
 
 .dark .bg-gray-100,
 .dark .bg-gray-200 {
-  background-color: hsl(261, 20%, 15%) !important;
+  background-color: hsl(260, 12%, 20%) !important;
 }
 
 .dark .hover\:bg-surface:hover {
-  background-color: hsl(261, 25%, 16%) !important;
+  background-color: hsl(260, 15%, 22%) !important;
 }
 
 .dark .hover\:bg-gray-200:hover {
-  background-color: hsl(261, 20%, 20%) !important;
+  background-color: hsl(260, 12%, 25%) !important;
+}
+
+.dark .bg-primary\/10 {
+  background-color: hsla(261, 60%, 60%, 0.15) !important;
+}
+
+.dark .bg-primary\/5 {
+  background-color: hsla(261, 60%, 60%, 0.08) !important;
+}
+
+.dark .hover\:text-neutral-900:hover {
+  color: hsl(0, 0%, 100%) !important;
+}
+
+.dark [data-radix-popper-content-wrapper] > div {
+  background-color: hsl(260, 15%, 16%) !important;
+  border-color: hsl(260, 12%, 25%) !important;
 }
 
 @keyframes agent-glow {

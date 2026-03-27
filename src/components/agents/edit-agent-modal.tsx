@@ -105,9 +105,6 @@ export function EditAgentModal({
   const [capabilities, setCapabilities] = useState(
     agent.capabilities.join(", ")
   );
-  const [executionMode, setExecutionMode] = useState(
-    agent.executionMode || "bullmq"
-  );
   const [apiKeyId, setApiKeyId] = useState(agent.apiKeyId || "");
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(false);
@@ -121,7 +118,6 @@ export function EditAgentModal({
     setModel(agent.model);
     setSystemPrompt(agent.systemPrompt || "");
     setCapabilities(agent.capabilities.join(", "));
-    setExecutionMode(agent.executionMode || "bullmq");
     setApiKeyId(agent.apiKeyId || "");
     setError("");
   }, [agent]);
@@ -165,7 +161,6 @@ export function EditAgentModal({
           systemPrompt: systemPrompt || null,
           capabilities: capsArray,
           apiKeyId: apiKeyId || null,
-          executionMode,
         }),
       });
 
@@ -272,21 +267,6 @@ export function EditAgentModal({
                 required
               />
             </div>
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-neutral-900">
-              Execution Runtime
-            </label>
-            <Select value={executionMode} onValueChange={(val) => val && setExecutionMode(val)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="bullmq">BullMQ Worker (Standard)</SelectItem>
-                <SelectItem value="lumys">Lumys OS (Advanced - Sandbox + Security)</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <div>
