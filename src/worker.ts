@@ -82,6 +82,19 @@ async function main() {
     } catch (err) {
       console.error("[Periodic Scan] Error:", err);
     }
+
+    // Master orchestrator scan
+    try {
+      const { masterOrchestratorScan } = await import("./lib/agents/master-scan");
+      const masterResult = await masterOrchestratorScan();
+      if ("error" in masterResult) {
+        // No master agent configured, skip
+      } else if (masterResult.assigned > 0 || masterResult.triggered > 0) {
+        console.log(`[Master Scan] Assigned: ${masterResult.assigned}, Triggered: ${masterResult.triggered}, Comments: ${masterResult.commented}`);
+      }
+    } catch (err) {
+      console.error("[Master Scan] Error:", err);
+    }
   }
 
   // Run immediately on startup
